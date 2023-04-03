@@ -1,4 +1,7 @@
 ﻿
+using Backend_CS.assets;
+using Microsoft.EntityFrameworkCore;
+
 namespace Backend_CS;
 
 public class Program
@@ -13,6 +16,7 @@ public class Program
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
+        builder.Services.AddDbContext<TableContext>(options => options.UseSqlite(builder.Configuration.GetConnectionString("TableContext")));
 
         var app = builder.Build();
 
