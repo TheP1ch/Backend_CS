@@ -1,4 +1,7 @@
 ﻿using System;
+using NuGet.Protocol.Plugins;
+using System.Text;
+using System.Security.Cryptography;
 
 
 namespace Backend_CS.Models
@@ -10,33 +13,36 @@ namespace Backend_CS.Models
         public int id { get; set; }
         public string name { get; set; }
         public string imgUrl { get; set; }
-        public bool isAdmin { get; set; }
+
+        private byte[] Password { get; set; }
+        public string PasswordHash
+        {
+            get
+            {
+                var sb = new StringBuilder();
+                foreach (var b in MD5.HashData(Password))
+                    sb.Append(b.ToString("x2"));
+                return sb.ToString();
+            }
+            set { Password = Encoding.UTF8.GetBytes(value); }
+        }
+
+        public bool IsAdmin => name == "admin";
+
+        public bool CheckPassword(string password) => PasswordHash == password;
 
         //default constructor
 
-        public Worker() : this(0)
+        public Worker()
         {
 
         }
 
-        public Worker(int id) : this(id, "", "", false)
+        public Worker(string name, string imgUrl, string password)
         {
-        }
-
-        public Worker(int id, string name, string imgUrl, bool isAdmin)
-        {
-            this.id = id;
             this.name = name;
             this.imgUrl = imgUrl;
-            this.isAdmin = isAdmin;
-        }
-
-        public List<RequestData> GetWorkerRequests(List<Request> requests)
-        {
-            return requests
-                .Where(r => r.requestData.userId == id)
-                .Select(r => r.requestData)
-                .ToList();
+            this.PasswordHash = password;
         }
 
     }

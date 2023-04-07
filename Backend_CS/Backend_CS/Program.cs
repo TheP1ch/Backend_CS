@@ -1,6 +1,9 @@
 ﻿
 using Backend_CS.assets;
+using Backend_CS.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Backend_CS;
 
@@ -11,6 +14,24 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
 
         // Add services to the container.
+
+        builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
+        {
+            options.TokenValidationParameters = new TokenValidationParameters()
+            {
+                ValidateIssuer = true,
+                ValidIssuer = Auth.Issuer,
+
+                ValidateAudience = true,
+                ValidAudience = Auth.Audience,
+
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = Auth.SigningKey,
+
+                ValidateLifetime = true,
+            };
+        }
+            );
 
         builder.Services.AddControllers();
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

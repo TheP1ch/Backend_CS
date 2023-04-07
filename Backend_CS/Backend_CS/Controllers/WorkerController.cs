@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Backend_CS.Models;
 using Backend_CS.assets;
+using Backend_CS.Models.DTO;
+using Microsoft.AspNetCore.Authorization;
+using System.Data;
 
 namespace Backend_CS.Controllers
 {
@@ -33,21 +36,21 @@ namespace Backend_CS.Controllers
         }
 
         // GET: api/Worker/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Worker>> GetWorker(int id)
+        [HttpGet("GetWorkerRequests")]
+        public async Task<ActionResult<IEnumerable<Request>>> GetWorker(int id)
         {
           if (_context.Workers == null)
           {
               return NotFound();
           }
-            var worker = await _context.Workers.FindAsync(id);
+            var workerRequests = _context.Requests.Include(rds => rds.requestData).Where(r => r.requestData.userId == id).ToList();
 
-            if (worker == null)
+            if (workerRequests == null)
             {
                 return NotFound();
             }
 
-            return worker;
+            return workerRequests;
         }
 
         // PUT: api/Worker/5
@@ -84,12 +87,13 @@ namespace Backend_CS.Controllers
         // POST: api/Worker
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Worker>> PostWorker(Worker worker)
+        public async Task<ActionResult<Worker>> PostWorker(WorkerDTO workerDTO)
         {
           if (_context.Workers == null)
           {
               return Problem("Entity set 'TableContext.Workers'  is null.");
           }
+            var worker = new Worker(workerDTO.name, workerDTO.imgUrl, workerDTO.password);
             _context.Workers.Add(worker);
             await _context.SaveChangesAsync();
 
@@ -98,6 +102,7 @@ namespace Backend_CS.Controllers
 
         // DELETE: api/Worker/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> DeleteWorker(int id)
         {
             if (_context.Workers == null)

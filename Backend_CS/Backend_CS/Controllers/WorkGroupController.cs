@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 using Backend_CS.Models;
 using Backend_CS.assets;
 
@@ -32,27 +33,58 @@ namespace Backend_CS.Controllers
             return await _context.WorkGroups.Include(rds => rds.requestsData).ToListAsync();
         }
 
+        [HttpGet("GetGroupWithMoreRequests")]
+        public async Task<ActionResult<WorkGroup>> GetWorkGroup()
+        {
+            if (_context.WorkGroups == null)
+            {
+                return NotFound();
+            }
+            var workGroup = _context.WorkGroups
+                .Include(rds => rds.requestsData)
+                .OrderByDescending(wg => wg.requestsData.Count())
+                .ToList()[0];
+            
+
+
+            return workGroup;
+        }
+
+        [HttpGet("GetNumberOfRequestsInWorkGroup")]
+        public async Task<ActionResult<int>> GetWorkGroups(int workGroupId)
+        {
+            if (_context.WorkGroups == null && _context.WorkGroups.Where(w => w.id == workGroupId) == null )
+            {
+                return NotFound();
+            }
+            var requests = _context.Requests.Where(r => r.workGroupId == workGroupId).ToList();
+            
+
+            return requests.Count();
+        }
+
         // GET: api/WorkGroup/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<WorkGroup>> GetWorkGroup(int id)
+        [HttpGet("GetWorkGroupRequests")]
+        public async Task<ActionResult<IEnumerable<RequestData>>> GetWorkGroup(int id)
         {
           if (_context.WorkGroups == null)
           {
               return NotFound();
           }
-            var workGroup = await _context.WorkGroups.FindAsync(id);
+            var workGroup = await _context.WorkGroups.Include(rds => rds.requestsData).FirstOrDefaultAsync(w => w.id == id);
 
             if (workGroup == null)
             {
                 return NotFound();
             }
 
-            return workGroup;
+            return workGroup.requestsData.ToList();
         }
 
         // PUT: api/WorkGroup/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> PutWorkGroup(int id, WorkGroup workGroup)
         {
             if (id != workGroup.id)
@@ -84,6 +116,7 @@ namespace Backend_CS.Controllers
         // POST: api/WorkGroup
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [Authorize(Roles = "admin")]
         public async Task<ActionResult<WorkGroup>> PostWorkGroup(WorkGroup workGroup)
         {
           if (_context.WorkGroups == null)
@@ -99,6 +132,7 @@ namespace Backend_CS.Controllers
 
         // DELETE: api/WorkGroup/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> DeleteWorkGroup(int id)
         {
             if (_context.WorkGroups == null)
