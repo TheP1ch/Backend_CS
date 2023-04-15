@@ -15,11 +15,11 @@ namespace Backend_CS.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class RequestContoller : ControllerBase
+    public class RequestController : ControllerBase
     {
         private readonly TableContext _context;
 
-        public RequestContoller(TableContext context)
+        public RequestController(TableContext context)
         {
             _context = context;
         }
@@ -241,7 +241,10 @@ namespace Backend_CS.Controllers
             }
             request.requestData.statusNumber = 0;
             var Request1 = new Request(request.workGroupId, request.id, request.requestData.name, request.requestData.price, request.requestData.userId, request.requestData.priorityId, request.requestData.statusNumber);
-            var requests = _context.Requests.Where(r => r.workGroupId == Request1.workGroupId && r.requestData.statusNumber == Request1.requestData.statusNumber).Include(rd => rd.requestData).ToList();
+            var requests = _context.Requests
+                .Where(r => r.workGroupId == Request1.workGroupId && r.requestData.statusNumber == Request1.requestData.statusNumber)
+                .Include(rd => rd.requestData)
+                .ToList();
 
             if (requests != null)
             {
