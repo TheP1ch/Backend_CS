@@ -1,15 +1,11 @@
 ﻿using System;
-using Azure.Core;
-
-namespace Backend_CS.Models
+namespace Backend_CS.Models.DTO
 {
-	public class RequestData
+	public class PostRequestDTO
 	{
-        public int id { get; set; }
+        public int workGroupId { get; set; }
         public string name { get; set; }
         public int price { get; set; }
-        public DateTime lastUpdateDate { get; set; }
-        public DateTime createDate { get; set; }
         public int? userId { get; set; }
         public int priorityId { get; set; }
         public int statusNumber { get; set; }

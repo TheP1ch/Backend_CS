@@ -222,25 +222,25 @@ namespace Backend_CS.Controllers
         // POST: api/RequestContoller
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        [Authorize(Roles = "admin")]
-        public async Task<ActionResult<Request>> PostRequest(Request request)
+        //[Authorize(Roles = "admin")]
+        public async Task<ActionResult<Request>> PostRequest(PostRequestDTO postRequestDto)
         {
             if (_context.Requests == null)
             {
                 return Problem("Entity set 'TableContext.Requests'  is null.");
             }
 
-            if (_context.WorkGroups.FirstOrDefault(wg => wg.id == request.workGroupId) == null)
+            if (_context.WorkGroups.FirstOrDefault(wg => wg.id == postRequestDto.workGroupId) == null)
             {
                 return Problem("You don't have workGroup with this id");
             }
 
-            if (_context.Workers.FirstOrDefault(w => w.id == request.requestData.userId) == null)
+            if (_context.Workers.FirstOrDefault(w => w.id == postRequestDto.userId) == null)
             {
-                request.requestData.userId = null;
+                postRequestDto.userId = null;
             }
-            request.requestData.statusNumber = 0;
-            var Request1 = new Request(request.workGroupId, request.id, request.requestData.name, request.requestData.price, request.requestData.userId, request.requestData.priorityId, request.requestData.statusNumber);
+            postRequestDto.statusNumber = 0;
+            var Request1 = new Request(postRequestDto.workGroupId, postRequestDto.name, postRequestDto.price, postRequestDto.userId, postRequestDto.priorityId, postRequestDto.statusNumber);
             var requests = _context.Requests
                 .Where(r => r.workGroupId == Request1.workGroupId && r.requestData.statusNumber == Request1.requestData.statusNumber)
                 .Include(rd => rd.requestData)
@@ -254,7 +254,7 @@ namespace Backend_CS.Controllers
             }
             _context.Requests.Add(Request1);
 
-            var workGroup = _context.WorkGroups.FirstOrDefault(wg => wg.id == request.workGroupId);
+            var workGroup = _context.WorkGroups.FirstOrDefault(wg => wg.id == postRequestDto.workGroupId);
             if (workGroup != null)
             {
                 workGroup.requestsData.Add(Request1.requestData);
@@ -268,7 +268,7 @@ namespace Backend_CS.Controllers
 
         // DELETE: api/RequestContoller/5
         [HttpDelete("{id}")]
-        [Authorize(Roles = "admin")]
+        //[Authorize(Roles = "admin")]
         public async Task<IActionResult> DeleteRequest(int id)
         {
             if (_context.Requests == null)
@@ -276,7 +276,7 @@ namespace Backend_CS.Controllers
                 return NotFound();
             }
             var request = await _context.Requests.FindAsync(id);
-            var requestData = await _context.requestDatas.FindAsync(id);
+            //var requestData = await _context.requestDatas.FindAsync(id);
             if (request == null)
             {
                 return NotFound();
@@ -284,9 +284,8 @@ namespace Backend_CS.Controllers
 
             _context.Requests.Remove(request);
             await _context.SaveChangesAsync();
-
-            _context.requestDatas.Remove(requestData);
-            await _context.SaveChangesAsync();
+            //_context.requestDatas.Remove(requestData);
+            //await _context.SaveChangesAsync();
 
             return NoContent();
         }

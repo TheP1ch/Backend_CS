@@ -13,7 +13,6 @@ namespace Backend_CS.Models
         public int id { get; set; }
         public string name { get; set; }
         public string imgUrl { get; set; }
-
         private byte[] Password { get; set; }
         public string PasswordHash
         {

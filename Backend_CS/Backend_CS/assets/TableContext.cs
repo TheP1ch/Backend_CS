@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Diagnostics;
 using Backend_CS.Models;
 using Microsoft.EntityFrameworkCore;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace Backend_CS.assets
 {
@@ -8,11 +10,11 @@ namespace Backend_CS.assets
 	{
 		public TableContext(DbContextOptions<TableContext> options) : base(options)
 		{
-			Database.EnsureCreated();
+            Database.Migrate();
 			
 		}
 
-		public DbSet<RequestData> requestDatas { get; set; }
+        public DbSet<RequestData> requestDatas { get; set; }
 
 		public DbSet<Worker> Workers { get; set; }
 

@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using Backend_CS.Models;
 using Backend_CS.assets;
+using Backend_CS.Models.DTO;
 
 namespace Backend_CS.Controllers
 {
@@ -36,7 +37,7 @@ namespace Backend_CS.Controllers
         [HttpGet("GetGroupWithMoreRequests")]
         public async Task<ActionResult<WorkGroup>> GetWorkGroup()
         {
-            if (_context.WorkGroups == null)
+            if (_context.WorkGroups == null || _context.WorkGroups.ToList().Count == 0)
             {
                 return NotFound();
             }
@@ -53,14 +54,14 @@ namespace Backend_CS.Controllers
         [HttpGet("GetNumberOfRequestsInWorkGroup")]
         public async Task<ActionResult<int>> GetWorkGroups(int workGroupId)
         {
-            if (_context.WorkGroups == null && _context.WorkGroups.Where(w => w.id == workGroupId) == null )
+            if (_context.WorkGroups == null || _context.WorkGroups.FirstOrDefault(w => w.id == workGroupId) == null )
             {
                 return NotFound();
             }
             var requests = _context.Requests.Where(r => r.workGroupId == workGroupId).ToList();
             
 
-            return requests.Count();
+            return requests.Count;
         }
 
         // GET: api/WorkGroup/5
@@ -116,14 +117,14 @@ namespace Backend_CS.Controllers
         // POST: api/WorkGroup
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        [Authorize(Roles = "admin")]
-        public async Task<ActionResult<WorkGroup>> PostWorkGroup(WorkGroup workGroup)
+        //[Authorize(Roles = "admin")]
+        public async Task<ActionResult<WorkGroup>> PostWorkGroup(PostWorkGroupDTO postWorkGroupDTO)
         {
           if (_context.WorkGroups == null)
           {
               return Problem("Entity set 'TableContext.WorkGroups'  is null.");
           }
-            workGroup.requestsData = new List<RequestData> ();
+            var workGroup = new WorkGroup(0, postWorkGroupDTO.name, new List<RequestData>());
             _context.WorkGroups.Add(workGroup);
             await _context.SaveChangesAsync();
 
@@ -132,19 +133,18 @@ namespace Backend_CS.Controllers
 
         // DELETE: api/WorkGroup/5
         [HttpDelete("{id}")]
-        [Authorize(Roles = "admin")]
+        //[Authorize(Roles = "admin")]
         public async Task<IActionResult> DeleteWorkGroup(int id)
         {
             if (_context.WorkGroups == null)
             {
                 return NotFound();
             }
-            var workGroup = await _context.WorkGroups.FindAsync(id);
+            var workGroup = _context.WorkGroups.Include(rd => rd.requestsData).FirstOrDefault(w => w.id == id);
             if (workGroup == null)
             {
                 return NotFound();
             }
-
             _context.WorkGroups.Remove(workGroup);
             await _context.SaveChangesAsync();
 

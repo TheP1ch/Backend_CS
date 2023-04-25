@@ -4,20 +4,21 @@ namespace Backend_CS.Models
 {
     public class Request {
         public int id { get; set; }
-        public RequestData requestData { get; set; }
+        public int requestDataId { get; set; }
+        public virtual RequestData requestData { get; set; }
         public int workGroupId { get; set; }
+        public virtual WorkGroup workGroup { get; set; }
 
         public Request()
         {
         }
         
-        public Request(int workGroupId,int id, string name, int price, int? workerId, int priorityId, int statusNumber)
+        public Request(int workGroupId, string name, int price, int? workerId, int priorityId, int statusNumber)
         {
-            this.id = id;
             this.workGroupId = workGroupId;
+            this.requestDataId = this.id;
             this.requestData = new RequestData
             {
-                id = id,
                 name = name,
                 price = price,
                 lastUpdateDate = DateTime.Now,

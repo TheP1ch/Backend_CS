@@ -114,10 +114,16 @@ namespace Backend_CS.Controllers
             {
                 return NotFound();
             }
+            var requestDatas = await _context.requestDatas.Where(rd => rd.userId == worker.id).ToListAsync();
 
             _context.Workers.Remove(worker);
             await _context.SaveChangesAsync();
 
+            foreach (RequestData rd in requestDatas)
+            {
+                rd.userId = null;
+            }
+            await _context.SaveChangesAsync();
             return NoContent();
         }
 
